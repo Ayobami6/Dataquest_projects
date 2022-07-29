@@ -1,0 +1,127 @@
+---
+title: "Project-1"
+author: "Ayo"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Importing the packages 
+```{r}
+library(tidyverse)
+library(skimr)
+```
+
+## Reading the dataset
+
+```{r}
+df <- read.csv('book_reviews.csv')
+```
+
+## Assessing the dataframe 
+```{r}
+dim(df)
+```
+
+```{r}
+colnames(df)
+```
+## check the datatypes 
+```{r}
+for (col in colnames(df)) {
+  print(class(df[[col]]))
+  }
+```
+
+## Checking the distinct values 
+```{r}
+
+for (col in colnames(df)) {
+  print(col)
+  print(unique(df[[col]]))
+}
+
+table(df$review)
+```
+```{r}
+new_df <- df %>% 
+  filter(!is.na(review))
+```
+
+## Cleaning the dataset
+
+```{r}
+clean_df <- new_df %>% 
+  mutate(
+    state = case_when(
+      state == 'California' ~ 'CA',
+      state == 'New York' ~ 'NY',
+      state == 'Texas' ~ 'TX',
+      state == 'Florida' ~ 'FL',
+      TRUE ~ state
+    )
+  )
+```
+
+```{r}
+clean_df <- clean_df %>%
+  mutate(
+    review_num = case_when(
+      review == "Poor" ~ 1,
+      review == "Fair" ~ 2,
+      review == "Good" ~ 3,
+      review == "Great" ~ 4,
+      review == "Excellent" ~ 5
+      ),
+    high_review = if_else(review_num >= 4, TRUE, FALSE)
+
+)
+
+```
+
+# Objective of analysis 
+## What book is the most profitable book
+## The most purchased book
+
+```{r}
+clean_df %>% 
+  group_by(book) %>% 
+  summarise(revenue = sum(price)) %>% 
+  arrange(-revenue)
+```
+
+```{r}
+clean_df %>% 
+  group_by(book) %>% 
+  summarise(sold = n()) %>%
+  arrange(-sold)
+
+```
+Here we see the highest sold books is Fundamental of R For Beginners 
+
+## Data visualization
+```{r, fig.width=15, fig.height=10}
+library(ggplot2)
+analysis <- clean_df %>% 
+  group_by(book) %>% 
+  summarise(revenue = sum(price)) %>% 
+  arrange(-revenue) %>% 
+  ggplot(aes(x=book, y=revenue, fill=book)) + geom_col(position = 'dodge') + 
+  labs(title = "Total sold price per books",
+       subtitle = 'This shows the total price all the books sold', 
+       x= "Books", 
+       y= 'Total sold price', 
+       caption= "Data from dataquest class") + theme(axis.text.x = element_blank()) 
+```
+
+```{r}
+analysis <- analysis + scale_fill_brewer(palette="Set2") + theme(legend.position = 'bottom') 
+analysis
+```
+
+From the result above we can see that the most profitable book is secrets of R for Advanced students 
