@@ -1,5 +1,5 @@
 # Book Review Project 
-### Project  from daatquest R for data science class 
+### Project  from dataquest R for data science class 
 
 
 # Objectives 
